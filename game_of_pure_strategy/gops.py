@@ -3,15 +3,12 @@ from typing import FrozenSet, Dict, Iterable, Tuple, List
 from itertools import combinations, product
 from functools import wraps
 import logging
-import sys
 
 import mip
-import click
 from tabulate import tabulate
 
 
 def logged(func):
-
     @wraps(func)
     def inner(*args, **kwargs):
         logging.debug(func.__name__)
@@ -96,7 +93,7 @@ def sign(i: int) -> int:
 
 @logged
 def optimize_player_strategy(
-        player_cards: List[int], opponent_cards: List[int], payoff_matrix: Matrix
+    player_cards: List[int], opponent_cards: List[int], payoff_matrix: Matrix
 ) -> Strategy:
     """ Get a solved linear program that optimizes player strategy """
 
@@ -108,10 +105,11 @@ def optimize_player_strategy(
 
     for opponent_card in opponent_cards:
         transposed_row = [
-            payoff_matrix[(player_card, opponent_card)]
-            for player_card in player_cards
+            payoff_matrix[(player_card, opponent_card)] for player_card in player_cards
         ]
-        constraint = mip.xsum(transposed_row[i] * x_i for i, x_i in enumerate(x)) - v >= 0
+        constraint = (
+            mip.xsum(transposed_row[i] * x_i for i, x_i in enumerate(x)) - v >= 0
+        )
         lp += constraint, f"strategy_against_{opponent_card}"
         logging.debug(f"constraint={constraint}")
 
@@ -130,7 +128,7 @@ def optimize_player_strategy(
         card_probabilities={
             card: lp.var_by_name(f"x_{card}").x for card in player_cards
         },
-        expected_value=lp.var_by_name("v").x
+        expected_value=lp.var_by_name("v").x,
     )
     logging.debug(f"strategy.expected_value={strategy.expected_value}")
     logging.debug("\n")
@@ -139,13 +137,14 @@ def optimize_player_strategy(
 
 @logged
 def get_strategies_for_possible_top_cards(
-        game_state: GameState, cached_game_values: Dict[GameState, float]
+    game_state: GameState, cached_game_values: Dict[GameState, float]
 ) -> Dict[int, Strategy]:
     """ Get a player strategy for every possible card from the deck. """
     if len(game_state.deck_cards) == 0:
         return dict()
 
     if len(game_state.deck_cards) == 1:
+
         def get_item(frozen_set: FrozenSet[int]) -> int:
             return next(iter(frozen_set))
 
@@ -155,34 +154,35 @@ def get_strategies_for_possible_top_cards(
 
         move_value = top_card * sign(player_move - opponent_move)
         only_possible_strategy = Strategy(
-            card_probabilities={player_move: 1.0},
-            expected_value=move_value
+            card_probabilities={player_move: 1.0}, expected_value=move_value
         )
         return {top_card: only_possible_strategy}
 
     strategies: Dict[int, Strategy] = dict()
     for top_card in game_state.deck_cards:
         payoff_matrix: Matrix = dict()
-        possible_moves = product(
-            game_state.player_cards, game_state.opponent_cards
-        )
+        possible_moves = product(game_state.player_cards, game_state.opponent_cards)
         for player_move, opponent_move in possible_moves:
             if player_move == opponent_move:
-                move_value = 0.
+                move_value = 0.0
             else:
                 move_value = top_card * sign(player_move - opponent_move)
             # TODO: use ordering and check for opposite games in cache to reduce memory usage
             continuation = game_state.after_round(top_card, player_move, opponent_move)
             continuation_value = cached_game_values[continuation]
 
-            payoff_matrix[(player_move, opponent_move)] = move_value + continuation_value
+            payoff_matrix[(player_move, opponent_move)] = (
+                move_value + continuation_value
+            )
 
         logging.debug(f"game_state={game_state}")
         logging.debug(f"top_card={top_card}")
         logging.debug(f"payoff_matrix={payoff_matrix}")
         logging.debug("")
         strategy = optimize_player_strategy(
-            list(game_state.player_cards), list(game_state.opponent_cards), payoff_matrix
+            list(game_state.player_cards),
+            list(game_state.opponent_cards),
+            payoff_matrix,
         )
         strategies[top_card] = strategy
 
@@ -191,7 +191,7 @@ def get_strategies_for_possible_top_cards(
 
 @logged
 def get_optimal_strategy(game_size: int) -> Dict[int, Strategy]:
-    cached_game_values: Dict[GameState, float] = {GameState.empty(): 0.}
+    cached_game_values: Dict[GameState, float] = {GameState.empty(): 0.0}
     for n_cards in card_range(game_size - 1):
         logging.debug(f"n_cards={n_cards}")
         logging.debug(f"cached_game_values={cached_game_values}")
@@ -218,7 +218,9 @@ def get_optimal_strategy(game_size: int) -> Dict[int, Strategy]:
 
         cached_game_values = game_values
 
-    game_state = next(GameState.of_size(game_size, max_card=game_size))  # there is only one such game
+    game_state = next(
+        GameState.of_size(game_size, max_card=game_size)
+    )  # there is only one such game
     strategies = get_strategies_for_possible_top_cards(game_state, cached_game_values)
     return strategies
 
@@ -234,15 +236,3 @@ def visualize_strategies(n_cards: int, strategies: Dict[int, Strategy]) -> str:
         table.append(row)
 
     return tabulate(table, headers=header, tablefmt="github", floatfmt=".4f")
-
-
-@click.command()
-@click.option("-n", "--n-cards", type=int, default=5, help="Number of cards in the deck")
-@click.option("-l", "--log-level", type=str, default="INFO", help="Log level: DEBUG/INFO/WARNING/ERROR")
-def optimize(n_cards: int, log_level: str):
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=log_level, stream=sys.stderr)
-
-    strategies = get_optimal_strategy(n_cards)
-    print(visualize_strategies(n_cards, strategies))
-
-    return strategies
