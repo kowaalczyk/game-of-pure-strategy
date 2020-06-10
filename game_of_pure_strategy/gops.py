@@ -71,6 +71,8 @@ class GameState:
             opponent_cards=self.opponent_cards,
             deck_cards=self.deck_cards,
         )
+        # TODO: For some reason uncommenting this breaks results, re-visit later:
+        # return opposite_game_state
 
 
 @dataclass(frozen=True)
