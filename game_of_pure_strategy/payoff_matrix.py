@@ -2,7 +2,7 @@ from typing import List, Optional, Iterable, Tuple, FrozenSet, Dict
 from itertools import permutations, combinations, product
 from dataclasses import dataclass
 
-from game_of_pure_strategy.modeling import card_range
+from game_of_pure_strategy.modeling import card_range, PayoffMatrix
 
 
 @dataclass(frozen=True)
@@ -144,7 +144,7 @@ def move_value(game_round: GameRound, remaining_game_value: float) -> float:
     return value
 
 
-def compute_payoff_matrix(max_cards: int) -> Dict[Tuple[int, int], float]:
+def compute_payoff_matrix(max_cards: int) -> PayoffMatrix:
     # NOTE: assuming that card values are in range [1, max_cards] (inclusive on both sides)
 
     previous_value_cache = ValueCache()

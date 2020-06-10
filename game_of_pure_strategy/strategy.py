@@ -1,11 +1,6 @@
-from typing import Dict, Tuple
-
 import mip
 
-from game_of_pure_strategy.modeling import card_range
-
-
-PayoffMatrix = Dict[Tuple[int, int], float]
+from game_of_pure_strategy.modeling import card_range, PayoffMatrix
 
 
 def find_nash_equilibrium(max_card: int, payoff_matrix: PayoffMatrix):
