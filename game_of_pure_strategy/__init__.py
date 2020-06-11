@@ -2,15 +2,16 @@ __version__ = "0.1.0"
 
 import logging
 import sys
+from typing import Dict
 
 import click
 
-from .gops import (
+from .gops import (  # noqa: F401
     GameState,
     Strategy,
     optimize_player_strategy,
     get_strategies_for_possible_top_cards,
-    get_optimal_strategy,
+    get_optimal_game_strategy,
     visualize_strategies,
 )
 
@@ -26,12 +27,12 @@ from .gops import (
     default="INFO",
     help="Log level: DEBUG/INFO/WARNING/ERROR",
 )
-def optimize(n_cards: int, log_level: str):
+def optimize(n_cards: int, log_level: str) -> Dict[int, Strategy]:
     logging.basicConfig(
         format="%(levelname)s: %(message)s", level=log_level, stream=sys.stderr
     )
 
-    strategies = get_optimal_strategy(n_cards)
+    strategies = get_optimal_game_strategy(n_cards)
     print(visualize_strategies(n_cards, strategies))
 
-    return strategies
+    return strategies  # noqa: T484

@@ -6,7 +6,7 @@ from game_of_pure_strategy import (
     Strategy,
     optimize_player_strategy,
     get_strategies_for_possible_top_cards,
-    get_optimal_strategy,
+    get_optimal_game_strategy,
 )
 
 
@@ -17,7 +17,6 @@ def test_version():
     assert __version__ == "0.1.0"
 
 
-@pytest.mark.skip("BUG: incorrect use of opposite currently breaks algorithm")
 def test_opposite_state():
     game_state = GameState(
         player_cards=frozenset([1]),
@@ -45,7 +44,10 @@ def test_state_after_round():
 def assert_strategy_equal(strategy, expected_strategy):
     assert strategy.expected_value == pytest.approx(expected_strategy.expected_value)
     for card in expected_strategy.card_probabilities:
-        assert strategy.card_probabilities[card] == pytest.approx(expected_strategy.card_probabilities[card])
+        assert strategy.card_probabilities[card] == pytest.approx(
+            expected_strategy.card_probabilities[card]
+        )
+
 
 OPTIMIZATION_TESTS = [
     (
@@ -53,28 +55,32 @@ OPTIMIZATION_TESTS = [
         [1, 2],
         [1, 2],
         {(1, 1): 0.0, (1, 2): 1.0, (2, 1): -1.0, (2, 2): 0.0},
-        Strategy(card_probabilities={1: 1., 2: 0.}, expected_value=0.),
+        Strategy(card_probabilities={1: 1.0, 2: 0.0}, expected_value=0.0),
     ),
     (
         # deck: {1, 2}, top: 2
         [1, 2],
         [1, 2],
         {(1, 1): 0.0, (1, 2): -1.0, (2, 1): 1.0, (2, 2): 0.0},
-        Strategy(card_probabilities={1: 0., 2: 1.}, expected_value=0.),
+        Strategy(card_probabilities={1: 0.0, 2: 1.0}, expected_value=0.0),
     ),
     (
         # deck: {1, 2}, top: 2
         [1, 2],
         [2, 3],
         {(1, 2): -3.0, (1, 3): -2.0, (2, 2): -1.0, (2, 3): -3.0},
-        Strategy(card_probabilities={1: 0.6666666, 2: 0.3333333}, expected_value=-2.3333333),
+        Strategy(
+            card_probabilities={1: 0.6666666, 2: 0.3333333}, expected_value=-2.3333333
+        ),
     ),
     (
         # deck: {1, 2}, top: 2
         [2, 3],
         [1, 2],
         {(2, 1): 3.0, (2, 2): 1.0, (3, 1): 2.0, (3, 2): 3.0},
-        Strategy(card_probabilities={2: 0.3333333, 3: 0.6666666}, expected_value=2.3333333),
+        Strategy(
+            card_probabilities={2: 0.3333333, 3: 0.6666666}, expected_value=2.3333333
+        ),
     ),
 ]
 
@@ -93,16 +99,28 @@ def test_recursion():
 
 
 E2E_TESTS = [
-    (1, {1: Strategy(card_probabilities={1: 1.}, expected_value=0.)}),
-    (2, {
-        1: Strategy(card_probabilities={1: 1., 2: 0.}, expected_value=0.),
-        2: Strategy(card_probabilities={1: 0., 2: 1.}, expected_value=0.),
-    }),
-    (3, {
-        1: Strategy(card_probabilities={1: 1., 2: 0., 3: 0.}, expected_value=0.),
-        2: Strategy(card_probabilities={1: 0., 2: 1., 3: 0.}, expected_value=0.),
-        3: Strategy(card_probabilities={1: 0., 2: 0., 3: 1.}, expected_value=0.),
-    }),
+    (1, {1: Strategy(card_probabilities={1: 1.0}, expected_value=0.0)}),
+    (
+        2,
+        {
+            1: Strategy(card_probabilities={1: 1.0, 2: 0.0}, expected_value=0.0),
+            2: Strategy(card_probabilities={1: 0.0, 2: 1.0}, expected_value=0.0),
+        },
+    ),
+    (
+        3,
+        {
+            1: Strategy(
+                card_probabilities={1: 1.0, 2: 0.0, 3: 0.0}, expected_value=0.0
+            ),
+            2: Strategy(
+                card_probabilities={1: 0.0, 2: 1.0, 3: 0.0}, expected_value=0.0
+            ),
+            3: Strategy(
+                card_probabilities={1: 0.0, 2: 0.0, 3: 1.0}, expected_value=0.0
+            ),
+        },
+    ),
 ]
 
 
@@ -110,7 +128,7 @@ E2E_TESTS = [
 def test_e2e(test_case):
     n_cards, expected_result = test_case
 
-    result = get_optimal_strategy(n_cards)
+    result = get_optimal_game_strategy(n_cards)
 
-    for i in range(1, n_cards+1):
+    for i in range(1, n_cards + 1):
         assert_strategy_equal(result[i], expected_result[i])
