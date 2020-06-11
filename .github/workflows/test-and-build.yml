@@ -21,24 +21,17 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - name: Run tests for Python 3.7
+    - name: Install
       uses: abatilo/actions-poetry@v1.5.0
       with:
         python_version: 3.7
         poetry_version: 1.0
         args: 'install'
 
-    - name: Run tests for Python 3.7
+    - name: Run tests
       uses: abatilo/actions-poetry@v1.5.0
       with:
         python_version: 3.7
-        poetry_version: 1.0
-        args: 'run pytest .'
-
-    - name: Run tests for Python 3.8
-      uses: abatilo/actions-poetry@v1.5.0
-      with:
-        python_version: 3.8
         poetry_version: 1.0
         args: 'run pytest .'
 
