@@ -44,7 +44,7 @@ equal to sum of the ranks of cards won (i.e. Ace is worth one point, 2 is two po
 Jack being worth 11, Queen 12, and King worth 13 points). Players may agree upon other scoring schemes.
 
 The implementation solves the game for a given number of cards *N*, and assumes that
-in case of a tie neither of the players get the prize. Moreover, assumes optimal strategy
+in case of a tie neither of the players get the prize. Moreover, it assumes optimal strategy
 tries to maximize the total value of cards won by player over the opponent, rather than
 the probability of having greater total value of cards than the opponent.
 
