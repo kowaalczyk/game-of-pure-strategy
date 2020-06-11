@@ -26,32 +26,32 @@ jobs:
       with:
         python_version: 3.7
         poetry_version: 1.0
-        working_directory: .
-        args: run pytest .
+        working_directory: '.'
+        args: 'run pytest .'
 
     - name: Run tests for Python 3.8
       uses: abatilo/actions-poetry@v1.5.0
       with:
         python_version: 3.8
         poetry_version: 1.0
-        working_directory: .
-        args: run pytest .
+        working_directory: '.'
+        args: 'run pytest .'
 
     - name: Run linting
       uses: abatilo/actions-poetry@v1.5.0
       with:
         python_version: 3.7
         poetry_version: 1.0
-        working_directory: .
-        args: run flake8 .
+        working_directory: '.'
+        args: 'run flake8 .'
 
     - name: Build Wheel
       uses: abatilo/actions-poetry@v1.5.0
       with:
         python_version: 3.7
         poetry_version: 1.0
-        working_directory: .
-        args: build -f wheel
+        working_directory: '.'
+        args: 'build -f wheel'
 
     - name: Upload wheel as artifact
       uses: actions/upload-artifact@v2
