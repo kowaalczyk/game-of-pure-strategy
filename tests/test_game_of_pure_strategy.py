@@ -14,7 +14,7 @@ from game_of_pure_strategy import (
 
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.2.0"
 
 
 def test_opposite_state():
@@ -92,10 +92,6 @@ def test_optimization(test_case):
     strategy = optimize_player_strategy(player_cards, opponent_cards, payoff_matrix)
 
     assert_strategy_equal(strategy, expected_strategy)
-
-
-def test_recursion():
-    pass
 
 
 E2E_TESTS = [

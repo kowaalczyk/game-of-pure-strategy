@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "game-of-pure-strategy"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Krzysztof Kowalczyk <k.kowaalczyk@gmail.com>"]
 
@@ -24,4 +24,4 @@ requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry.plugins."console_scripts"]
-"optimize-strategy" = "game_of_pure_strategy:optimize"
+"gops" = "game_of_pure_strategy:optimize"
